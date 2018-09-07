@@ -5,6 +5,7 @@
 
 #include <sifive/bits.h>
 #include <sifive/smp.h>
+#define SKIP_ECC_WIPEDOWN // Bootrom: doesn't have ECC wipedown
 
   .section .text.init
   .globl _prog_start
