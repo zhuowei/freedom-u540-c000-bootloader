@@ -49,8 +49,10 @@ void uart_put_hex(void* uartctrl, uint32_t hex) {
   }
 }
 
+/* Bootrom doesn't have this
 void uart_put_hex64(void *uartctrl, uint64_t hex){
   uart_put_hex(uartctrl,hex>>32);
   uart_put_hex(uartctrl,hex&0xFFFFFFFF);
 }
+*/
 
