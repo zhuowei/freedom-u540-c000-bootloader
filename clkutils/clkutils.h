@@ -56,12 +56,14 @@ inline static uint64_t clkutils_read_mcycle() {
 // In the future, we may want to determine whether to
 // use RTC vs mcycle, or create a different function
 // based off mcycle.
+// ! In the original open source version,
 // We add 1 to the then value because otherwise, if you wanted
 // to delay up to RTC_PERIOD_NS-1 (for example), you wouldn't delay
 // at all. So this function delays AT LEAST delay_ns.
+// ! To match older FSBL, revert this change.
 inline void clkutils_delay_ns(int delay_ns) {
   uint64_t now = clkutils_read_mtime();
-  uint64_t then = now + delay_ns / RTC_PERIOD_NS + 1;
+  uint64_t then = now + delay_ns / RTC_PERIOD_NS;
 
   do {
     now = clkutils_read_mtime();
