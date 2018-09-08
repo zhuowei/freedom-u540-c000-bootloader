@@ -268,9 +268,11 @@ int sd_copy(spi_ctrl* spi, void* dst, uint32_t src_lba, size_t size)
       rc = SD_COPY_ERROR_CMD18_CRC;
       break;
     }
+#if 0 // Bootrom: doesn't have this
     if ((i % 2000) == 0){ 
       puts(".");
     }
+#endif
   } while (--i > 0);
 
   sd_cmd(spi, SD_CMD(SD_CMD_STOP_TRANSMISSION), 0, 0x01);

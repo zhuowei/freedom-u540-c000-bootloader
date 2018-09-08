@@ -30,10 +30,12 @@ void init_uart(unsigned int peripheral_input_khz)
   UART0_REG(UART_REG_DIV) = uart_min_clk_divisor(peripheral_input_khz * 1000ULL, uart_target_hz);
 }
 
+#if 0 // Bootrom doesn't have it
 /* no-op */
 int puts(const char* str){
 	return 1;
 }
+#endif
 
 int main()
 {
