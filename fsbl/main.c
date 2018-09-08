@@ -124,6 +124,27 @@ int puts(const char * str){
 	return 1;
 }
 
+// added: dump bootrom
+static void hexdump(const char* region, size_t region_size) {
+  void* uartctrl = (void *) UART0_CTRL_ADDR;
+  uart_puts(uartctrl, "Dumping region ");
+  uart_put_hex64(uartctrl, (uint64_t)region);
+  uart_puts(uartctrl, " size ");
+  uart_put_hex64(uartctrl, region_size);
+  uart_puts(uartctrl, "\n");
+  for (size_t i = 0; i < region_size; i++) {
+    int hex = region[i];
+    // copied from uart_put_hex, modified to print one byte
+    int num_nibbles = 2;
+    for (int nibble_idx = num_nibbles - 1; nibble_idx >= 0; nibble_idx--) {
+      char nibble = (hex >> (nibble_idx * 4)) & 0xf;
+      uart_putc(uartctrl, (nibble < 0xa) ? ('0' + nibble) : ('a' + nibble - 0xa));
+    }
+    uart_putc(uartctrl, (i & 0xf) == 0xf? '\n': ' ');
+  }
+  uart_puts(uartctrl, "----DONE----\n");
+}
+
 //HART 0 runs main
 
 int main(int id, unsigned long dtb)
@@ -162,6 +183,10 @@ int main(int id, unsigned long dtb)
   if ((UX00PRCI_REG(UX00PRCI_DDRPLLOUT)      ^ pllout_default))         return (__LINE__);
   if (((UX00PRCI_REG(UX00PRCI_GEMGXLPLLCFG)) ^ pll_default) & lockmask) return (__LINE__);
   if (((UX00PRCI_REG(UX00PRCI_GEMGXLPLLOUT)) ^ pllout_default))         return (__LINE__);
+
+  // added: dump the bootrom out before clocks are raised
+  hexdump((const char*)0x10000, 0x8000);
+  // end
 
   //CORE pll init
   // If tlclksel is set for 2:1 operation,
