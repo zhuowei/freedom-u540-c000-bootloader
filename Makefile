@@ -10,7 +10,7 @@ OBJCOPY=${CROSSCOMPILE}objcopy
 OBJDUMP=${CROSSCOMPILE}objdump
 CFLAGS=-I. -O2 -ggdb -march=rv64imafdc -mabi=lp64d -Wall -mcmodel=medany -mexplicit-relocs
 CCASFLAGS=-I. -mcmodel=medany -mexplicit-relocs
-LDFLAGS=-nostdlib -nostartfiles
+LDFLAGS=-nostdlib -nostartfiles -Wl,--no-relax
 
 # This is broken up to match the order in the original zsbl
 # clkutils.o is there to match original zsbl, may not be needed

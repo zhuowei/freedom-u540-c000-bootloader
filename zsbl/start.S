@@ -83,7 +83,10 @@ _start:
 
   .align 2
 trap_entry:
-  call handle_trap
+  // Bootrom: we globally disabled linker relaxations
+  // but this is actually a jal in the bootrom
+  // so switch it to a jal from a call
+  jal handle_trap
 
   .section .rodata
 _dtb:
