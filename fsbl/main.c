@@ -131,7 +131,7 @@ static void hexdump(const char* region, size_t region_size) {
   uart_put_hex64(uartctrl, (uint64_t)region);
   uart_puts(uartctrl, " size ");
   uart_put_hex64(uartctrl, region_size);
-  uart_puts(uartctrl, "\n");
+  uart_puts(uartctrl, "\r\n");
   for (size_t i = 0; i < region_size; i++) {
     int hex = region[i];
     // copied from uart_put_hex, modified to print one byte
@@ -140,9 +140,13 @@ static void hexdump(const char* region, size_t region_size) {
       char nibble = (hex >> (nibble_idx * 4)) & 0xf;
       uart_putc(uartctrl, (nibble < 0xa) ? ('0' + nibble) : ('a' + nibble - 0xa));
     }
-    uart_putc(uartctrl, (i & 0xf) == 0xf? '\n': ' ');
+    if ( (i & 0xf) == 0xf){
+      uart_puts(uartctrl, "\r\n");
+    } else {
+      uart_putc(uartctrl, ' ');
+    }
   }
-  uart_puts(uartctrl, "----DONE----\n");
+  uart_puts(uartctrl, "----DONE----\r\n");
 }
 
 //HART 0 runs main
@@ -162,7 +166,12 @@ int main(int id, unsigned long dtb)
     peripheral_input_khz = initial_core_clk_khz / 2;
   }
   UART0_REG(UART_REG_DIV) = uart_min_clk_divisor(peripheral_input_khz * 1000ULL, uart_target_hz);
+  UART0_REG(UART_REG_TXCTRL) = UART_TXEN;
 
+  // added: dump the bootrom out before clocks are raised
+  hexdump((const char*)0x10000, 0x8000);
+
+  // end
   // Check Reset Values (lock don't care)
   uint32_t pll_default =
     (PLL_R(PLL_R_default)) |
@@ -184,9 +193,6 @@ int main(int id, unsigned long dtb)
   if (((UX00PRCI_REG(UX00PRCI_GEMGXLPLLCFG)) ^ pll_default) & lockmask) return (__LINE__);
   if (((UX00PRCI_REG(UX00PRCI_GEMGXLPLLOUT)) ^ pllout_default))         return (__LINE__);
 
-  // added: dump the bootrom out before clocks are raised
-  hexdump((const char*)0x10000, 0x8000);
-  // end
 
   //CORE pll init
   // If tlclksel is set for 2:1 operation,
